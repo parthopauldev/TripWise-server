@@ -28,6 +28,15 @@ app.get('/', (req, res) => {
 async function run() {
   try {
     await client.connect();
+    const myDB = client.db("TripWiseUser");
+   const productsCollection= myDB.collection("products");
+
+    // products 
+    app.post('/products', async(req,res) => {
+      const newProduct = req.body;
+      const result = await productsCollection.insertOne(newProduct);
+      res.send(result)
+    })
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
