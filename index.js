@@ -31,13 +31,29 @@ async function run() {
     const myDB = client.db("TripWiseUser");
    const productsCollection= myDB.collection("products");
 
+    // products  api
     // products Post api
     app.post('/products', async(req,res) => {
       const newProduct = req.body;
       const result = await productsCollection.insertOne(newProduct);
       res.send(result)
     })
-    // products Deleted api
+    // products patch api
+    app.patch('/products/:id', async (req, res) => {
+      const id = req.params.id;
+      const updateProduct = req.body;
+      const query = { _id: new ObjectId(id) };
+      const update = {
+        $set: {
+          name: updateProduct.name,
+          price:updateProduct.price
+        }
+      }
+      const result = await productsCollection.updateOne(query, update);
+      res.send(result)
+
+    })
+    // products Delete api
     app.delete('/products/:id',async(req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
