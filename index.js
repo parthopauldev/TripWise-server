@@ -31,10 +31,17 @@ async function run() {
     const myDB = client.db("TripWiseUser");
    const productsCollection= myDB.collection("products");
 
-    // products get api
+    // products get api for get all product
     app.get('/products', async (req, res) => {
       const cursor = productsCollection.find()
       const result = await cursor.toArray();
+      res.send(result);
+    })
+    // products get api for get single product
+    app.get('/products/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await productsCollection.findOne(query);
       res.send(result);
     })
     // products Post api
