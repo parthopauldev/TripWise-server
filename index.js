@@ -1,13 +1,43 @@
 const express = require("express");
+
 const cors = require("cors");
+const admin = require("firebase-admin");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 const app = express();
 const port = process.env.PORT || 3000;
 
+
+const serviceAccount = require("./tripwise-firebase-admin.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+
 // middleware
 app.use(cors());
 app.use(express.json());
+
+const verifyFirebaseToken = async(req, res, next) => {
+  const authorization = req.headers.authorization;
+  if (!authorization) {
+    return res.status(401).send({message:'unauthorized access'})
+  }
+  const token = authorization.split(' ')[1];
+  console.log(token);
+  
+try{
+const decoded=await admin.auth().verifyIdToken(token);
+console.log('inside token',decoded)
+req.token_email=decoded.email;
+next()
+}
+catch(error){
+return res.status(401).send({message:'unauthorized access'})
+}
+ 
+}
 // TripWiseUser
 // FeIbvw0xK5xQXEf1
 const uri =
@@ -41,7 +71,7 @@ async function run() {
       res.send(result);
     });
     // products get api for get single product
-    app.get("/products/:id", async (req, res) => {
+    app.get("/products/:id",verifyFirebaseToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await productsCollection.findOne(query);
@@ -56,6 +86,8 @@ async function run() {
     // products patch api
     app.patch("/products/:id", async (req, res) => {
       const id = req.params.id;
+      console.log(id);
+      
       const updateProduct = req.body;
       const query = { _id: new ObjectId(id) };
       const update = {
@@ -75,18 +107,37 @@ async function run() {
     });
     // bookProducts post api
     app.post("/bookProducts", async (req, res) => {
-      const newBid = req.body;
-      const result = await bookProductCollection.insertOne(newBid);
+      const newProduct = req.body;
+      const result = await bookProductCollection.insertOne(newProduct);
       res.send(result);
     });
-    app.get("/products", async (req, res) => {
+    app.get("/userProducts",verifyFirebaseToken, async (req, res) => {
+      
       const email = req.query.email;
       const query = {};
       if (email) {
         query.userEmail = email;
+        if (email !== req.token_email) {
+          return res.status(403).send({message:'forbidded access'})
+        }
       }
 
-      const cursor = productsCollection.find(query);
+      const cursor = bookProductCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+   app.get("/bookProducts",verifyFirebaseToken, async (req, res) => {
+      
+      const email = req.query.email;
+      const query = {};
+      if (email) {
+        query.userEmail = email;
+         if (email !== req.token_email) {
+          return res.status(403).send({message:'forbidded access'})
+        }
+      }
+
+      const cursor = bookProductCollection.find(query);
       const result = await cursor.toArray();
       res.send(result);
     });
