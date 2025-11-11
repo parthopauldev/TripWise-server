@@ -29,8 +29,10 @@ async function run() {
   try {
     await client.connect();
     const myDB = client.db("TripWiseUser");
+    
    const productsCollection= myDB.collection("products");
-
+   const bookProductCollection= myDB.collection("bookProducts");
+   
     // products get api for get all product
     app.get('/products', async (req, res) => {
       const cursor = productsCollection.find()
@@ -57,8 +59,8 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const update = {
         $set: {
-          name: updateProduct.name,
-          price:updateProduct.price
+          vehicleName: updateProduct.vehicleName
+           
         }
       }
       const result = await productsCollection.updateOne(query, update);
@@ -72,7 +74,12 @@ async function run() {
       const result = await productsCollection.deleteOne(query);
       res.send(result)
     })
-
+    // bookProducts post api 
+app.post('/bookProducts', async (req, res) => {
+            const newBid = req.body;
+            const result = await bookProductCollection.insertOne(newBid);
+            res.send(result);
+        })
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
