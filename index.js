@@ -85,7 +85,7 @@ async function run() {
       console.log(id);
 
       const updateProduct = req.body;
-      const query = { _id: id };
+      const query = { _id: new ObjectId(id) };
       const update = {
         $set: {
           vehicleName: updateProduct.vehicleName,
@@ -94,13 +94,11 @@ async function run() {
           pricePerDay: updateProduct.pricePerDay,
           location: updateProduct.location,
           availability: updateProduct.availability,
-          description: updateProduct.description,
           coverImage: updateProduct.coverImage,
-          userEmail: updateProduct.userEmail,
-          categories: updateProduct.categories,
+          userEmail: updateProduct.userEmail
         },
       };
-      const result = await bookProductCollection.updateOne(query, update);
+      const result = await productsCollection.updateOne(query, update);
       res.send(result);
     });
     // products Delete api
@@ -108,8 +106,8 @@ async function run() {
       const id = req.params.id;
       console.log(id);
 
-      const query = { _id: id };
-      const result = await bookProductCollection.deleteOne(query);
+      const query = { _id:new ObjectId( id) };
+      const result = await productsCollection.deleteOne(query);
       res.send(result);
     });
     // bookProducts post api
@@ -128,7 +126,7 @@ async function run() {
         }
       }
 
-      const cursor = bookProductCollection.find(query);
+      const cursor = productsCollection.find(query);
       const result = await cursor.toArray();
       res.send(result);
     });
