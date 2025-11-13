@@ -1,3 +1,4 @@
 node_modules
 tripwise-firebase-admin.json
 .env
+.vercel

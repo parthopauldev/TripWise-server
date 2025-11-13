@@ -3,9 +3,10 @@ const express = require("express");
 const cors = require("cors");
 const admin = require("firebase-admin");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-
+require("dotenv").config()
 const app = express();
 const port = process.env.PORT || 3000;
+
 
 const serviceAccount = require("./tripwise-firebase-admin.json");
 
@@ -37,7 +38,7 @@ const verifyFirebaseToken = async (req, res, next) => {
 // TripWiseUser
 // FeIbvw0xK5xQXEf1
 const uri =
-  "mongodb+srv://TripWiseUser:FeIbvw0xK5xQXEf1@simpleapp.suaq6bu.mongodb.net/?appName=simpleapp";
+  `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@simpleapp.suaq6bu.mongodb.net/?appName=simpleapp`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -54,7 +55,7 @@ app.get("/", (req, res) => {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
     const myDB = client.db("TripWiseUser");
 
     const productsCollection = myDB.collection("products");
@@ -145,7 +146,7 @@ async function run() {
       res.send(result);
     });
 
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
